@@ -30,6 +30,7 @@ function renderCartLines() {
         const dish = state.dishes.find((d) => d.id === dishId);
         const name = dish ? dish.name : `Dish #${dishId}`;
         const price = dish ? rupees(dish.price * qty) : '...';
+        const atLimit = dish && qty >= Math.min(MAX_PER_DISH, dish.stock);
         const stockNote = dish
           ? html`<small class="muted">In stock: ${dish.stock}${qty > dish.stock ? ' · cart quantity exceeds stock' : ''}</small>`
           : '';
@@ -43,7 +44,7 @@ function renderCartLines() {
           <div class="cart-line-actions">
             <button class="qty-btn small" data-cart="dec" aria-label="One less ${name}">&minus;</button>
             <span class="qty-value">${qty}</span>
-            <button class="qty-btn small" data-cart="inc" aria-label="One more ${name}">+</button>
+            <button class="qty-btn small" data-cart="inc" aria-label="One more ${name}" ${raw(atLimit ? 'disabled' : '')}>+</button>
             <button class="link-btn" data-cart="remove">Remove</button>
           </div>
         </div>`;

@@ -148,10 +148,11 @@ function qtyControl(dish) {
   const qty = cartQty(dish.id);
 
   if (qty > 0) {
+    const atLimit = qty >= Math.min(MAX_PER_DISH, dish.stock);
     return html`<div class="qty-row">
       <button class="qty-btn" data-action="dec" aria-label="One less ${dish.name}">&minus;</button>
       <span class="qty-value" data-qty="${dish.id}">${qty}</span>
-      <button class="qty-btn" data-action="inc" aria-label="One more ${dish.name}">+</button>
+      <button class="qty-btn" data-action="inc" aria-label="One more ${dish.name}" ${raw(atLimit ? 'disabled' : '')}>+</button>
     </div>`;
   }
 

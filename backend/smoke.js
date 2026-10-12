@@ -201,6 +201,8 @@ const near = (a, b, tolerance = 0.02) => Math.abs(a - b) < tolerance;
     check('junk dishId rejected', (await bad({ items: [{ dishId: 'abc', qty: 1 }] })).status === 400);
     check('empty order rejected', (await bad({ items: [] })).status === 400);
     check('qty over stock rejected', (await bad({ items: [{ dishId: orderable.id, qty: 99 }] })).status === 400);
+    const lowStockDish = menu.json.dishes.find((d) => d.stock > 0 && d.stock < 3) || orderable;
+    check('qty above current stock rejected', (await bad({ items: [{ dishId: lowStockDish.id, qty: lowStockDish.stock + 1 }] })).status === 400);
     check('duplicate dish rejected', (await bad({ items: [{ dishId: orderable.id, qty: 1 }, { dishId: orderable.id, qty: 1 }] })).status === 400);
     check('bad room rejected', (await bad({ items: [{ dishId: orderable.id, qty: 1 }], hostelRoom: 'ZZ9' })).status === 400);
     check('long note rejected', (await bad({ items: [{ dishId: orderable.id, qty: 1 }], note: 'x'.repeat(200) })).status === 400);
@@ -236,6 +238,9 @@ const near = (a, b, tolerance = 0.02) => Math.abs(a - b) < tolerance;
     check('room normalised', placed.json.hostelRoom === 'B-204');
     check('eta is sensible', placed.json.etaMinutes > 0 && placed.json.etaMinutes <= 45);
     check('points earned recorded', placed.json.pointsEarned >= 0);
+
+    const myOrders = await call(`/api/orders?memberId=${MEMBER}&limit=25`);
+    check('member order list includes this order', myOrders.json.orders.some((o) => o.token === placed.json.token));
 
     const repeat = await call('/api/orders', {
       method: 'POST',
